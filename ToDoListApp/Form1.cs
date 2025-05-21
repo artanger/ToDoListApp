@@ -43,32 +43,40 @@ namespace ToDoListApp
         }
         private void btnSave_Click_1(object sender, EventArgs e)
         {
-            using (var db = new LiteDatabase("ToDoData.db"))
-            {
-                var collection = db.GetCollection<Item>("tasks");
-                collection.DeleteAll(); // Очистим старые данные перед сохранением
 
-                foreach (var task in lstTasks.Items)
+            try
+            {
+                using (var db = new LiteDatabase("ToDoData.db"))
                 {
-                    if (task is Item item)
+                    var collection = db.GetCollection<Item>("tasks");
+                    collection.DeleteAll(); // Очистим старые данные перед сохранением
+
+                    foreach (var task in lstTasks.Items)
                     {
-                        collection.Insert(item);
-                    }
-                    else if (task is string description) // если вдруг старый тип
-                    {
-                        var newItem = new Item
+                        if (task is Item item)
                         {
-                            Description = description,
-                            CreatedAt = DateTime.Now
-                        };
-                        collection.Insert(newItem);
+                            collection.Insert(item);
+                        }
+                        else if (task is string description) // если вдруг старый тип
+                        {
+                            var newItem = new Item
+                            {
+                                Description = description,
+                                CreatedAt = DateTime.Now
+                            };
+                            collection.Insert(newItem);
+                        }
                     }
                 }
+                label1.Text = "💾 Tasks saved to database.";
+                label1.ForeColor = Color.Blue;
             }
-            label1.Text = "💾 Tasks saved to database.";
-            label1.ForeColor = Color.Blue;
+            catch (Exception ex) 
+            {
+                label1.Text = $"💾 Error: {ex.Message}.";
+                label1.ForeColor = Color.Red;
+            }
         }
-
 
         private void btnLoad_Click_1(object sender, EventArgs e)
         {
