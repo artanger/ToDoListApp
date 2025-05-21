@@ -1,4 +1,5 @@
-﻿namespace ToDoListApp
+﻿
+namespace ToDoListApp
 {
     partial class Form1
     {
@@ -38,6 +39,7 @@
             labelDate = new Label();
             lblDate = new Label();
             btnDelete = new Button();
+            chkServer = new CheckBox();
             SuspendLayout();
             // 
             // txtTask
@@ -132,12 +134,23 @@
             btnDelete.UseVisualStyleBackColor = true;
             btnDelete.Click += btnDelete_Click;
             // 
+            // chkServer
+            // 
+            chkServer.AutoSize = true;
+            chkServer.Location = new Point(200, 103);
+            chkServer.Name = "chkServer";
+            chkServer.Size = new Size(15, 14);
+            chkServer.TabIndex = 11;
+            chkServer.UseVisualStyleBackColor = true;
+            chkServer.CheckedChanged += ChkServer_CheckedChanged;
+            // 
             // Form1
             // 
             AcceptButton = btnAdd;
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(386, 408);
+            Controls.Add(chkServer);
             Controls.Add(btnDelete);
             Controls.Add(lblDate);
             Controls.Add(labelDate);
@@ -155,6 +168,7 @@
             PerformLayout();
         }
 
+
         #endregion
 
         private TextBox txtTask;
@@ -167,5 +181,6 @@
         private Label labelDate;
         private Label lblDate;
         private Button btnDelete;
+        private CheckBox chkServer;
     }
 }
