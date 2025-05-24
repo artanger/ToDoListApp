@@ -1,24 +1,52 @@
 ﻿using LiteDB;
+using System.Text.RegularExpressions;
 
 namespace ToDoListApp
 {
     public partial class Form1 : Form
     {
+        private CalendarControl _calendarControl;
+        private object editingItem = null;
+
         public Form1()
         {
             InitializeComponent();
+            _calendarControl = new CalendarControl(calendarPanel, monthLabel, prevButton, nextButton);
+            _calendarControl.DateSelected += CalendarControl_DateSelected;
         }
-        private void btnAdd_Click_1(object sender, EventArgs e)
+
+        private void CalendarControl_DateSelected(object sender, DateTime selectedDate)
+        {
+            lblDate.Text = selectedDate.ToString("dd.MM.yyyy");
+        }
+
+        private void btnSaveTask_Click(object sender, EventArgs e)
         {
             string task = txtTask.Text.Trim();
             if (!string.IsNullOrWhiteSpace(task))
             {
+                // Парсим дату из lblDate
+                DateTime taskDate;
+                if (!DateTime.TryParseExact(lblDate.Text, "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out taskDate) || lblDate.Text == "Date")
+                {
+                    taskDate = DateTime.Now; // Если дата не выбрана или невалидна, используем текущую
+                }
+
+                // Создаём или обновляем задачу
+                Item newItem = new Item
+                {
+                    Description = task,
+                    CreatedAt = DateTime.Now,
+                    TaskDate = taskDate
+                };
+
                 if (editingItem != null)
                 {
                     int index = lstTasks.Items.IndexOf(editingItem);
-                    if (index >= 0)
+                    if (index >= 0 && editingItem is Item existingItem)
                     {
-                        lstTasks.Items[index] = task;
+                        newItem.Id = existingItem.Id; // Сохраняем Id для обновления
+                        lstTasks.Items[index] = newItem;
                         label1.Text = "✅ Task updated.";
                         label1.ForeColor = Color.Green;
                     }
@@ -26,54 +54,46 @@ namespace ToDoListApp
                 }
                 else
                 {
-                    lstTasks.Items.Add(task);
+                    lstTasks.Items.Add(newItem);
                     label1.Text = "✅ Task added.";
                     label1.ForeColor = Color.Green;
                 }
 
+                // Сохранение в базу
+                try
+                {
+                    using (var db = new LiteDatabase("ToDoData.db"))
+                    {
+                        var collection = db.GetCollection<Item>("tasks");
+
+                        if (newItem.Id > 0)
+                        {
+                            // Обновляем существующую запись
+                            collection.Update(newItem);
+                        }
+                        else
+                        {
+                            // Добавляем новую запись
+                            collection.Insert(newItem);
+                        }
+                    }
+                    label1.Text = "💾 Task saved to database.";
+                    label1.ForeColor = Color.Blue;
+                }
+                catch (Exception ex)
+                {
+                    label1.Text = $"💾 Error: {ex.Message}.";
+                    label1.ForeColor = Color.Red;
+                    return;
+                }
+
                 txtTask.Clear();
                 txtTask.Focus();
-                lblDate.Text = DateTime.Now.ToString("dd.MM.yyyy HH:mm");
+                // Не обновляем lblDate.Text, чтобы сохранить выбранную дату
             }
             else
             {
                 label1.Text = "⚠️ Task cannot be empty.";
-                label1.ForeColor = Color.Red;
-            }
-        }
-        private void btnSave_Click_1(object sender, EventArgs e)
-        {
-
-            try
-            {
-                using (var db = new LiteDatabase("ToDoData.db"))
-                {
-                    var collection = db.GetCollection<Item>("tasks");
-                    collection.DeleteAll(); // Очистим старые данные перед сохранением
-
-                    foreach (var task in lstTasks.Items)
-                    {
-                        if (task is Item item)
-                        {
-                            collection.Insert(item);
-                        }
-                        else if (task is string description) // если вдруг старый тип
-                        {
-                            var newItem = new Item
-                            {
-                                Description = description,
-                                CreatedAt = DateTime.Now
-                            };
-                            collection.Insert(newItem);
-                        }
-                    }
-                }
-                label1.Text = "💾 Tasks saved to database.";
-                label1.ForeColor = Color.Blue;
-            }
-            catch (Exception ex) 
-            {
-                label1.Text = $"💾 Error: {ex.Message}.";
                 label1.ForeColor = Color.Red;
             }
         }
@@ -93,7 +113,7 @@ namespace ToDoListApp
                 label1.Text = "📂 Tasks loaded from database.";
                 label1.ForeColor = Color.DarkCyan;
 
-                lblDate.Text = DateTime.Now.ToString("dd.MM.yyyy HH:mm");
+                lblDate.Text = "Date"; // Сбрасываем lblDate при загрузке
             }
         }
 
@@ -101,29 +121,55 @@ namespace ToDoListApp
         {
             if (lstTasks.SelectedItems.Count > 0)
             {
-                // Удалить все выбранные элементы
                 var selectedItems = lstTasks.SelectedItems.Cast<object>().ToArray();
-                foreach (var item in selectedItems)
+                try
                 {
-                    lstTasks.Items.Remove(item);
+                    using (var db = new LiteDatabase("ToDoData.db"))
+                    {
+                        var collection = db.GetCollection<Item>("tasks");
+                        foreach (var item in selectedItems)
+                        {
+                            if (item is Item taskItem)
+                            {
+                                collection.Delete(taskItem.Id);
+                            }
+                            lstTasks.Items.Remove(item);
+                        }
+                    }
+                    label1.Text = "🗑️ Selected tasks deleted.";
+                    label1.ForeColor = Color.OrangeRed;
                 }
-                label1.Text = "🗑️ Selected tasks deleted.";
-                label1.ForeColor = Color.OrangeRed;
+                catch (Exception ex)
+                {
+                    label1.Text = $"🗑️ Error: {ex.Message}.";
+                    label1.ForeColor = Color.Red;
+                }
             }
             else if (lstTasks.Items.Count > 0)
             {
-                // Удалить все, если ничего не выделено
-                lstTasks.Items.Clear();
-                label1.Text = "🧹 All tasks cleared.";
-                label1.ForeColor = Color.Gray;
+                try
+                {
+                    using (var db = new LiteDatabase("ToDoData.db"))
+                    {
+                        var collection = db.GetCollection<Item>("tasks");
+                        collection.DeleteAll();
+                        lstTasks.Items.Clear();
+                    }
+                    label1.Text = "🧹 All tasks cleared.";
+                    label1.ForeColor = Color.Gray;
+                }
+                catch (Exception ex)
+                {
+                    label1.Text = $"🧹 Error: {ex.Message}.";
+                    label1.ForeColor = Color.Red;
+                }
             }
             else
             {
                 label1.Text = "📭 Nothing to delete.";
                 label1.ForeColor = Color.DimGray;
             }
-            // Обновление даты
-            lblDate.Text = DateTime.Now.ToString("dd.MM.yyyy HH:mm");
+            lblDate.Text = "Date"; // Сбрасываем lblDate после удаления
         }
 
         private void lstTasks_KeyDown(object sender, KeyEventArgs e)
@@ -135,20 +181,27 @@ namespace ToDoListApp
             }
         }
 
-        private object editingItem = null;
         private void lstTasks_DoubleClick(object sender, EventArgs e)
         {
             if (lstTasks.SelectedItem != null)
             {
                 editingItem = lstTasks.SelectedItem;
-                txtTask.Text = editingItem.ToString();
+                if (editingItem is Item item)
+                {
+                    txtTask.Text = item.Description;
+                    lblDate.Text = item.TaskDate.ToString("dd.MM.yyyy");
+                }
+                else
+                {
+                    txtTask.Text = editingItem.ToString();
+                    lblDate.Text = "Date";
+                }
                 txtTask.Focus();
 
                 label1.Text = "✏️ Editing task...";
                 label1.ForeColor = Color.MediumBlue;
             }
         }
-
 
     }
 }
