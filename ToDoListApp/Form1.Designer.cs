@@ -49,6 +49,8 @@
             label3 = new Label();
             label2 = new Label();
             tableLayoutPanel1 = new TableLayoutPanel();
+            cmbCategories = new ComboBox();
+            btnAddNewCategories = new Button();
             tableLayoutPanel1.SuspendLayout();
             SuspendLayout();
             // 
@@ -56,7 +58,7 @@
             // 
             txtTask.Location = new Point(12, 367);
             txtTask.Name = "txtTask";
-            txtTask.Size = new Size(370, 25);
+            txtTask.Size = new Size(364, 25);
             txtTask.TabIndex = 0;
             // 
             // lstTasks
@@ -65,14 +67,14 @@
             lstTasks.Location = new Point(12, 17);
             lstTasks.Name = "lstTasks";
             lstTasks.SelectionMode = SelectionMode.MultiExtended;
-            lstTasks.Size = new Size(182, 344);
+            lstTasks.Size = new Size(364, 344);
             lstTasks.TabIndex = 1;
             lstTasks.DoubleClick += lstTasks_DoubleClick;
             lstTasks.KeyDown += lstTasks_KeyDown;
             // 
             // btnSave
             // 
-            btnSave.Location = new Point(200, 336);
+            btnSave.Location = new Point(382, 366);
             btnSave.Name = "btnSave";
             btnSave.Size = new Size(182, 25);
             btnSave.TabIndex = 4;
@@ -82,7 +84,7 @@
             // 
             // btnLoad
             // 
-            btnLoad.Location = new Point(200, 307);
+            btnLoad.Location = new Point(382, 337);
             btnLoad.Name = "btnLoad";
             btnLoad.Size = new Size(182, 25);
             btnLoad.TabIndex = 5;
@@ -93,7 +95,7 @@
             // lblStatistics
             // 
             lblStatistics.AutoSize = true;
-            lblStatistics.Location = new Point(200, 17);
+            lblStatistics.Location = new Point(385, 51);
             lblStatistics.Name = "lblStatistics";
             lblStatistics.Size = new Size(143, 17);
             lblStatistics.TabIndex = 6;
@@ -110,7 +112,7 @@
             // labelDate
             // 
             labelDate.AutoSize = true;
-            labelDate.Location = new Point(200, 67);
+            labelDate.Location = new Point(385, 101);
             labelDate.Name = "labelDate";
             labelDate.Size = new Size(38, 17);
             labelDate.TabIndex = 8;
@@ -120,14 +122,14 @@
             // 
             lblDate.Anchor = AnchorStyles.None;
             lblDate.Font = new Font("Segoe UI", 10F);
-            lblDate.Location = new Point(244, 67);
+            lblDate.Location = new Point(542, 103);
             lblDate.Name = "lblDate";
             lblDate.Size = new Size(100, 17);
             lblDate.TabIndex = 9;
             // 
             // btnDelete
             // 
-            btnDelete.Location = new Point(200, 279);
+            btnDelete.Location = new Point(382, 309);
             btnDelete.Name = "btnDelete";
             btnDelete.Size = new Size(182, 25);
             btnDelete.TabIndex = 10;
@@ -282,21 +284,41 @@
             tableLayoutPanel1.Controls.Add(nextButton, 3, 0);
             tableLayoutPanel1.Controls.Add(monthLabel, 1, 0);
             tableLayoutPanel1.Dock = DockStyle.Right;
-            tableLayoutPanel1.Location = new Point(412, 0);
+            tableLayoutPanel1.Location = new Point(637, 0);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
             tableLayoutPanel1.RowCount = 3;
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100.000008F));
-            tableLayoutPanel1.Size = new Size(319, 414);
+            tableLayoutPanel1.Size = new Size(319, 419);
             tableLayoutPanel1.TabIndex = 17;
+            // 
+            // cmbCategories
+            // 
+            cmbCategories.FormattingEnabled = true;
+            cmbCategories.Location = new Point(385, 17);
+            cmbCategories.Name = "cmbCategories";
+            cmbCategories.Size = new Size(143, 25);
+            cmbCategories.TabIndex = 18;
+            // 
+            // btnAddNewCategories
+            // 
+            btnAddNewCategories.Location = new Point(534, 17);
+            btnAddNewCategories.Name = "btnAddNewCategories";
+            btnAddNewCategories.Size = new Size(33, 25);
+            btnAddNewCategories.TabIndex = 19;
+            btnAddNewCategories.Text = "+";
+            btnAddNewCategories.UseVisualStyleBackColor = true;
+            btnAddNewCategories.Click += btnAddNewCategories_Click_1;
             // 
             // Form1
             // 
             AcceptButton = btnSave;
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(731, 414);
+            ClientSize = new Size(956, 419);
+            Controls.Add(btnAddNewCategories);
+            Controls.Add(cmbCategories);
             Controls.Add(tableLayoutPanel1);
             Controls.Add(btnDelete);
             Controls.Add(lblDate);
@@ -351,5 +373,7 @@
         private Label label2;
         private Label label8;
         private TableLayoutPanel tableLayoutPanel1;
+        private ComboBox cmbCategories;
+        private Button btnAddNewCategories;
     }
 }

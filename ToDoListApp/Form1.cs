@@ -7,14 +7,22 @@ namespace ToDoListApp
     {
         private CalendarControl _calendarControl;
         private object editingItem = null;
-
+        private List<string> _categories = new List<string> { "All" };
         public Form1()
         {
             InitializeComponent();
             _calendarControl = new CalendarControl(calendarPanel, monthLabel, prevButton, nextButton);
             _calendarControl.DateSelected += CalendarControl_DateSelected;
-        }
 
+            InitializeCategories();
+        }
+        private void InitializeCategories()
+        {
+            cmbCategories.Items.Clear();
+            cmbCategories.Items.AddRange(_categories.ToArray());
+            cmbCategories.SelectedIndex = 0; // Установить "All" по умолчанию
+        }
+       
         private void CalendarControl_DateSelected(object sender, DateTime selectedDate)
         {
             lblDate.Text = selectedDate.ToString("dd.MM.yyyy");
@@ -203,5 +211,22 @@ namespace ToDoListApp
             }
         }
 
+        private void btnAddNewCategories_Click_1(object sender, EventArgs e)
+        {
+            // Создание и показ диалогового окна AddNewCategories
+            using (var dialog = new AddNewCategories())
+            {
+                if (dialog.ShowDialog(this) == DialogResult.OK)
+                {
+                    // Получение новой категории из формы
+                    string newCategory = dialog.GetNewCategory();
+                    if (!string.IsNullOrWhiteSpace(newCategory) && !_categories.Contains(newCategory))
+                    {
+                        _categories.Add(newCategory);
+                        InitializeCategories(); // Обновление ComboBox
+                    }
+                }
+            }
+        }
     }
 }
